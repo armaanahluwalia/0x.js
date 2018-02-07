@@ -29,11 +29,27 @@ contract MixinSettlementProxy is
     LibPartialAmount
 {
 
-    address public TOKEN_TRANSFER_PROXY_CONTRACT;
+    ITokenTransferProxy TRANSFER_PROXY;
+    IToken ZRX_TOKEN;
     
-    address public ZRX_TOKEN_CONTRACT;
+    function transferProxy()
+        external view
+        returns (ITokenTransferProxy)
+    {
+        return TRANSFER_PROXY;
+    }
     
-    function MixinSettlementProxy(address proxyContract, address zrxToken)
+    function zrxToken()
+        external view
+        returns (IToken)
+    {
+        return ZRX_TOKEN;
+    }
+    
+    function MixinSettlementProxy(
+        ITokenTransferProxy proxyContract,
+        IToken zrxToken
+    )
         public
     {
         ZRX_TOKEN_CONTRACT = zrxToken;
@@ -52,13 +68,13 @@ contract MixinSettlementProxy is
         )
     {
         makerTokenFilledAmount = getPartialAmount(takerTokenFilledAmount, order.takerTokenAmount, order.makerTokenAmount);
-        require(transferViaTokenTransferProxy(
+        require(TRANSFER_PROXY.transferFrom(
             order.makerToken,
             order.maker,
             taker,
             makerTokenFilledAmount
         ));
-        require(transferViaTokenTransferProxy(
+        require(TRANSFER_PROXY.transferFrom(
             order.takerToken,
             taker,
             order.maker,
@@ -67,7 +83,7 @@ contract MixinSettlementProxy is
         if (order.feeRecipient != address(0)) {
             if (order.makerFee > 0) {
                 makerFeePaid = getPartialAmount(takerTokenFilledAmount, order.takerTokenAmount, order.makerFee);
-                require(transferViaTokenTransferProxy(
+                require(TRANSFER_PROXY.transferFrom(
                     ZRX_TOKEN_CONTRACT,
                     order.maker,
                     order.feeRecipient,
@@ -76,7 +92,7 @@ contract MixinSettlementProxy is
             }
             if (order.takerFee > 0) {
                 takerFeePaid = getPartialAmount(takerTokenFilledAmount, order.takerTokenAmount, order.takerFee);
-                require(transferViaTokenTransferProxy(
+                require(TRANSFER_PROXY.transferFrom(
                     ZRX_TOKEN_CONTRACT,
                     taker,
                     order.feeRecipient,
@@ -86,23 +102,4 @@ contract MixinSettlementProxy is
         }
         return (makerTokenFilledAmount, makerFeePaid, takerFeePaid);
     }
-
-    /// @dev Transfers a token using TokenTransferProxy transferFrom function.
-    /// @param token Address of token to transferFrom.
-    /// @param from Address transfering token.
-    /// @param to Address receiving token.
-    /// @param value Amount of token to transfer.
-    /// @return Success of token transfer.
-    function transferViaTokenTransferProxy(
-        address token,
-        address from,
-        address to,
-        uint256 value)
-        internal
-        returns (bool success)
-    {
-        success = ITokenTransferProxy(TOKEN_TRANSFER_PROXY_CONTRACT).transferFrom(token, from, to, value);
-        return success;
-    }
-
 }
