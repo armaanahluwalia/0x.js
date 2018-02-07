@@ -29,8 +29,25 @@ contract MixinSignatureValidator is
         Invalid,
         Caller,
         Ecrecover,
+        EIP712,
         Contract
     }
+    
+    bytes32 public constant orderSchemaHash = keccak256(
+        "address exchangeContractAddress",
+        "address makerAddress",
+        "address takerAddress",
+        "address makerTokenAddress",
+        "address takerTokenAddress",
+        "address feeRecipientAddress",
+        "uint256 makerTokenAmount",
+        "uint256 takerTokenAmount",
+        "uint256 makerFeeAmount",
+        "uint256 takerFeeAmount",
+        "uint256 expirationTimestamp",
+        "uint256 salt"
+    );
+
   
     function isValidSignature(
         bytes32 hash,
@@ -56,7 +73,7 @@ contract MixinSignatureValidator is
             isValid = signer == msg.sender;
             return;
         
-        // Signed using  web3.eth_sign
+        // Signed using web3.eth_sign
         } else if (stype == SignatureType.Ecrecover) {
             require(signature.length == 66);
             uint8 v = uint8(signature[1]);
@@ -69,6 +86,21 @@ contract MixinSignatureValidator is
                 s
             );
             isValid = signer == recovered;
+            return;
+            
+        // Signature using EIP712
+        } else if (stype == SignatureType.EIP712) {
+            // TODO This is breaking with the domain separator!
+            uint8 v = uint8(signature[1]);
+            bytes32 r = get32(signature, 2);
+            bytes32 s = get32(signature, 35);
+            address recovered = ecrecover(
+                keccak256(orderSchemaHash, orderHash),
+                v,
+                r,
+                s
+            );
+            valid = signer == recovered;
             return;
             
         // Signature verified by signer contract
