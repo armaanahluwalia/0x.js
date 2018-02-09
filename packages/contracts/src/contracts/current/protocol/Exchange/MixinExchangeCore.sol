@@ -153,8 +153,8 @@ contract MixinExchangeCore is
         filled[order.orderHash] = safeAdd(filled[order.orderHash], takerTokenFilledAmount);
         
         // Settle order
-        var (filledMakerTokenAmount, paidMakerFee, paidTakerFee) =
-            settleOrder(order, msg.sender, filledTakerTokenAmount);
+        var (makerTokenFilledAmount, makerFeePaid, takerFeePaid) =
+            settleOrder(order, msg.sender, takerTokenFillAmount);
         
         // Log order
         LogFill(
@@ -163,7 +163,7 @@ contract MixinExchangeCore is
             order.feeRecipient,
             order.makerToken,
             order.takerToken,
-            filledMakerTokenAmount,
+            makerTokenFilledAmount,
             takerTokenFilledAmount,
             makerFeePaid,
             takerFeePaid,
