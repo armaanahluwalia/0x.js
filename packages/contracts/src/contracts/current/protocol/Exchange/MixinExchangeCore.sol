@@ -107,7 +107,7 @@ contract MixinExchangeCore is
             require(isValidSignature(
                 order.orderHash,
                 order.maker,
-                signature
+                makerSignature
             ));
         }
         
