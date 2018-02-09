@@ -26,7 +26,7 @@ import "./MixinWrapperFunctions.sol";
 
 contract Exchange is
     MixinExchangeCore,
-    MixinSignatureValidatorEcrecover,
+    MixinSignatureValidator,
     MixinSettlementProxy,
     MixinWrapperFunctions
 {
