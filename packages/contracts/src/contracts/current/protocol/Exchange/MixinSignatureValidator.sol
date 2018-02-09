@@ -100,17 +100,18 @@ contract MixinSignatureValidator is
             r = get32(signature, 2);
             s = get32(signature, 35);
             address recovered = ecrecover(
-                keccak256(orderSchemaHash, orderHash),
+                /// TODO: Move this to higher level
+                keccak256(orderSchemaHash, hash),
                 v,
                 r,
                 s
             );
-            valid = signer == recovered;
+            isValid = signer == recovered;
             return;
             
         // Signature verified by signer contract
         } else if (stype == SignatureType.Contract) {
-            valid = ISigner(signer).validate(hash, signature);
+            isValid = ISigner(signer).validate(hash, signature);
             return;
         
         // Anything else is illegal
