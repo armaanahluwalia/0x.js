@@ -61,6 +61,11 @@ contract MixinSignatureValidator is
         require(signature.length >= 1);
         SignatureType stype = SignatureType(uint8(signature[0]));
         
+        // Variables are not scoped in Solidity
+        uint8 v;
+        bytes32 r;
+        bytes32 s;
+        
         // Zero is always an invalid signature
         if (stype == SignatureType.Invalid) {
             require(signature.length == 1);
@@ -76,10 +81,10 @@ contract MixinSignatureValidator is
         // Signed using web3.eth_sign
         } else if (stype == SignatureType.Ecrecover) {
             require(signature.length == 66);
-            uint8 v = uint8(signature[1]);
-            bytes32 r = get32(signature, 2);
-            bytes32 s = get32(signature, 34);
-            address recovered = ecrecover(
+            v = uint8(signature[1]);
+            r = get32(signature, 2);
+            s = get32(signature, 34);
+            recovered = ecrecover(
                 keccak256("\x19Ethereum Signed Message:\n32", hash),
                 v,
                 r,
@@ -91,9 +96,9 @@ contract MixinSignatureValidator is
         // Signature using EIP712
         } else if (stype == SignatureType.EIP712) {
             // TODO This is breaking with the domain separator!
-            uint8 v = uint8(signature[1]);
-            bytes32 r = get32(signature, 2);
-            bytes32 s = get32(signature, 35);
+            v = uint8(signature[1]);
+            r = get32(signature, 2);
+            s = get32(signature, 35);
             address recovered = ecrecover(
                 keccak256(orderSchemaHash, orderHash),
                 v,
