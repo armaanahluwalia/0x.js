@@ -52,8 +52,8 @@ contract MixinSettlementProxy is
     )
         public
     {
-        ZRX_TOKEN_CONTRACT = zrxToken;
-        TOKEN_TRANSFER_PROXY_CONTRACT = proxyContract;
+        ZRX_TOKEN = zrxToken;
+        TRANSFER_PROXY = proxyContract;
     }
     
     function settleOrder(
@@ -84,7 +84,7 @@ contract MixinSettlementProxy is
             if (order.makerFee > 0) {
                 makerFeePaid = getPartialAmount(takerTokenFilledAmount, order.takerTokenAmount, order.makerFee);
                 require(TRANSFER_PROXY.transferFrom(
-                    ZRX_TOKEN_CONTRACT,
+                    ZRX_TOKEN,
                     order.maker,
                     order.feeRecipient,
                     makerFeePaid
@@ -93,7 +93,7 @@ contract MixinSettlementProxy is
             if (order.takerFee > 0) {
                 takerFeePaid = getPartialAmount(takerTokenFilledAmount, order.takerTokenAmount, order.takerFee);
                 require(TRANSFER_PROXY.transferFrom(
-                    ZRX_TOKEN_CONTRACT,
+                    ZRX_TOKEN,
                     taker,
                     order.feeRecipient,
                     takerFeePaid
