@@ -112,6 +112,17 @@ contract MixinExchangeCore is
             orderHash: getOrderHash(orderAddresses, orderValues)
         });
         
+        // Validate order expiration
+        if (block.timestamp >= order.expirationTimestampInSec) {
+            
+            // Clear order storage state to potentially reclaim gas
+            filled[order.orderHash] = 0;
+            cancelled[order.orderHash] = 0;
+            
+            LogError(uint8(Errors.ORDER_EXPIRED), order.orderHash);
+            return 0;
+        }
+        
         FillOrder memory fillOrderStruct = FillOrder({
             orderHash: order.orderHash,
             taker: order.taker,
@@ -142,11 +153,6 @@ contract MixinExchangeCore is
         ));
         require(takerTokenFillAmount > 0);
 
-        // Validate order expiration
-        if (block.timestamp >= order.expirationTimestampInSec) {
-            LogError(uint8(Errors.ORDER_EXPIRED), order.orderHash);
-            return 0;
-        }
         
         // Validate order availability
         uint256 remainingTakerTokenAmount = safeSub(order.takerTokenAmount, getUnavailableTakerTokenAmount(order.orderHash));
@@ -213,6 +219,16 @@ contract MixinExchangeCore is
             orderHash: getOrderHash(orderAddresses, orderValues)
         });
 
+        if (block.timestamp >= order.expirationTimestampInSec) {
+            
+            // Clear order storage state to potentially reclaim gas
+            filled[order.orderHash] = 0;
+            cancelled[order.orderHash] = 0;
+            
+            LogError(uint8(Errors.ORDER_EXPIRED), order.orderHash);
+            return 0;
+        }
+
         CancelOrder memory cancelOrderStruct = CancelOrder({
             orderHash: order.orderHash,
             taker: taker,
@@ -227,11 +243,6 @@ contract MixinExchangeCore is
             cancelOrderStruct.taker,
             takerSignature
         ));
-
-        if (block.timestamp >= order.expirationTimestampInSec) {
-            LogError(uint8(Errors.ORDER_EXPIRED), order.orderHash);
-            return 0;
-        }
 
         uint256 remainingTakerTokenAmount = safeSub(order.takerTokenAmount, getUnavailableTakerTokenAmount(order.orderHash));
         takerTokenCancelledAmount = min256(takerTokenCancelAmount, remainingTakerTokenAmount);
