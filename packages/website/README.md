@@ -28,6 +28,10 @@ Add the following to your `/etc/hosts` file:
 yarn install
 ```
 
+### Install Binary Dependency:
+
+Although [wkhtmltoimage](https://github.com/timstudd/node-wkhtmltoimage) has been added to package.json the binary needs to be installed manually on the machine running the server. See the github page for installation instructions.
+
 ### Run dev server
 
 ```bash
