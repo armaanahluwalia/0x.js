@@ -1,6 +1,7 @@
+var express = require("express");
+var favicon = require('serve-favicon');
 var path = require("path");
 var mu2Express = require("mu2Express");
-var express = require("express");
 var webpack = require("webpack");
 var webpackDevMiddleware = require("webpack-dev-middleware");
 var webpackHotMiddleware = require("webpack-hot-middleware");
@@ -16,6 +17,7 @@ const app           = express(),
 app.engine('mustache', mu2Express.engine);
 app.set("port", process.env.PORT || DEFAULT_PORT);
 app.set("view engine", "mustache");
+app.use(favicon(path.join(__dirname, 'public','images','favicon','favicon.ico')));
 
 if (isDevelopment) {
 	app.use(webpackDevMiddleware(compiler, {
@@ -33,29 +35,36 @@ else {
 // Route for the thumbnail Image
 
 app.get('/OGThumbnail', (req, res, next) => {
+  console.log('serving thumbnail route');
   var order = req.query.order;
   var obj;
   if (order) {
     obj = JSON.parse(decodeURIComponent(order));
     res.setHeader('Content-Type', 'image/png');
-    // HTML
+    // Generate thumbnail and pipe to response
     wkhtmltoimage.generate(orderThumbnailParser(obj), { width: '650', height: '650' })
-    .pipe(res);
+    .pipe(res).on('end', function() {
+      console.log('stream ended', arguments[0]);
+    })
     return;
   }
-  var error = new Error('missing order');
-  error.status = 400;
-  res.send(error);
+  res.status(400).send({ error: 'missing order' });
 });
 
 // Route for the main site
 
-app.get("*", (req, res, next) => {
+app.get("/*", (req, res, next) => {
   var order = req.query.order;
-  var obj = order && JSON.parse(decodeURIComponent(order));
+  var obj;
+  try {
+    obj = (order) ? JSON.parse(decodeURIComponent(order)) : undefined;
+  } catch(e) {
+    console.log('Error parsing order')
+  }
   // console.log('req.query.order', decodeURIComponent(order), typeof req.query.order);
   // console.log('obj', obj, typeof obj.thumbnailContent);
-  var imageURL = (obj && obj.thumbnailContent) ? '/OGThumbnail/?order=' + encodeURIComponent(order) : '/images/og_image.png';
+  var thumbnailContent = obj && obj.signedOrder && obj.signedOrder.orderThumbnailContent;
+  var imageURL = (thumbnailContent) ? '/OGThumbnail/?order=' + encodeURIComponent(order) : '/images/og_image.png';
   res.render('home', {
       locals: {
         OGImageURL: imageURL

@@ -46,6 +46,7 @@ export class FillOrderJSON extends React.Component<FillOrderJSONProps, FillOrder
             hintOrderExpiryTimestamp,
             '',
             '',
+            '',
             constants.MAKER_FEE,
             constants.TAKER_FEE,
             feeRecipient,

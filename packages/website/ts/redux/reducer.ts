@@ -30,6 +30,7 @@ export interface State {
     orderTakerAddress: string;
     orderECSignature: ECSignature;
     orderSalt: BigNumber;
+    orderThumbnailContent: string;
     nodeVersion: string;
     screenWidth: ScreenWidths;
     shouldBlockchainErrDialogBeOpen: boolean;
@@ -64,6 +65,7 @@ const INITIAL_STATE: State = {
         v: 27,
     },
     orderTakerAddress: ZeroEx.NULL_ADDRESS,
+    orderThumbnailContent: '',
     orderSalt: ZeroEx.generatePseudoRandomSalt(),
     nodeVersion: undefined,
     screenWidth: utils.getScreenWidth(),
@@ -274,6 +276,13 @@ export function reducer(state: State = INITIAL_STATE, action: Action) {
             return {
                 ...state,
                 userAddress: action.data,
+            };
+        }
+
+        case ActionTypes.UpdateOrderThumbnailContent: {
+            return {
+                ...state,
+                orderThumbnailContent: action.data,
             };
         }
 

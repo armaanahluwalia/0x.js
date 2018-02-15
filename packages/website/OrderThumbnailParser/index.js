@@ -89,42 +89,49 @@ function generateImageHTML(order) {
         html: htmlFn,
     };
   };
-
+  var makerTokenSymbol = order.metadata.makerToken.symbol;
+  var makerTokenDigits = order.signedOrder.makerTokenAmount;
+  var makerTokenDecimals = order.metadata.makerToken.decimals;
+  var makerTokenAmount = (makerTokenDigits / Math.pow(10,makerTokenDecimals));
+  var takerTokenSymbol = order.metadata.takerToken.symbol;
+  var takerTokenDigits = order.signedOrder.takerTokenAmount;
+  var takerTokenDecimals = order.metadata.takerToken.decimals;
+  var takerTokenAmount = (takerTokenDigits / Math.pow(10,takerTokenDecimals));
   // Maker Token Logo
   addRule('maker-token-logo',
     generateMatchFn(/^<<MAKER_TOKEN_LOGO>>/),
     ruleCaptureFn,
-    createImgFn(PUBLIC_FOLDER + tokenSymbolMap[order.maker.token.symbol])
+    createImgFn(PUBLIC_FOLDER + tokenSymbolMap[makerTokenSymbol])
   );
   // Maker Token Symbol
   addRule('maker-token-symbol',
     generateMatchFn(/^<<MAKER_TOKEN_SYMBOL>>/),
     ruleCaptureFn,
-    createHtmlTextFn(order.maker.token.symbol)
+    createHtmlTextFn(makerTokenSymbol)
   );
   // Maker Token Amount
   addRule('maker-token-amount',
     generateMatchFn(/^<<MAKER_TOKEN_AMOUNT>>/),
     ruleCaptureFn,
-    createHtmlTextFn((order.maker.amount / Math.pow(10,order.maker.token.decimals)).toString())
+    createHtmlTextFn(makerTokenAmount.toString())
   );
   // Taker Token Logo
   addRule('taker-token-logo',
     generateMatchFn(/^<<TAKER_TOKEN_LOGO>>/),
     ruleCaptureFn,
-    createImgFn(PUBLIC_FOLDER + tokenSymbolMap[order.taker.token.symbol])
+    createImgFn(PUBLIC_FOLDER + tokenSymbolMap[takerTokenSymbol])
   );
   // Taker Token Symbol
   addRule('taker-token-symbol',
     generateMatchFn(/^<<TAKER_TOKEN_SYMBOL>>/),
     ruleCaptureFn,
-    createHtmlTextFn(order.taker.token.symbol)
+    createHtmlTextFn(takerTokenSymbol)
   );
   // Taker Token Amount
   addRule('taker-token-amount',
     generateMatchFn(/^<<TAKER_TOKEN_AMOUNT>>/),
     ruleCaptureFn,
-    createHtmlTextFn((order.taker.amount / Math.pow(10,order.taker.token.decimals)).toString())
+    createHtmlTextFn(takerTokenAmount.toString())
   );
 
   var rules = Object.assign({}, SimpleMarkdown.defaultRules, rules);
@@ -134,8 +141,7 @@ function generateImageHTML(order) {
       return rawBuiltParser(blockSource, {inline: false});
   };
   var htmlOutput = SimpleMarkdown.htmlFor(SimpleMarkdown.ruleOutput(rules, 'html'));
-  var syntaxTree = parse(order.thumbnailContent);
-  console.log(htmlOutput(syntaxTree));
+  var syntaxTree = parse(order.signedOrder.orderThumbnailContent);
   return imageTemplateHeader
     + htmlOutput(syntaxTree)
     + imageTemplateFooter;

@@ -129,6 +129,7 @@ export enum ActionTypes {
     UpdateUserEtherBalance = 'UPDATE_USER_ETHER_BALANCE',
     UpdateUserSuppliedOrderCache = 'UPDATE_USER_SUPPLIED_ORDER_CACHE',
     UpdateOrderFillAmount = 'UPDATE_ORDER_FILL_AMOUNT',
+    UpdateOrderThumbnailContent = 'UPDATE_ORDER_THUMBNAIL_CONTENT',
     UpdateShouldBlockchainErrDialogBeOpen = 'UPDATE_SHOULD_BLOCKCHAIN_ERR_DIALOG_BE_OPEN',
 
     // Docs

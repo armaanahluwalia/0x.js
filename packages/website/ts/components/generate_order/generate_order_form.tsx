@@ -3,6 +3,8 @@ import { BigNumber } from '@0xproject/utils';
 import * as _ from 'lodash';
 import Dialog from 'material-ui/Dialog';
 import Divider from 'material-ui/Divider';
+import Paper from 'material-ui/Paper';
+import TextField from 'material-ui/TextField';
 import * as React from 'react';
 import * as ReactGA from 'react-ga';
 import { Blockchain } from 'ts/blockchain';
@@ -24,6 +26,7 @@ import { colors } from 'ts/utils/colors';
 import { constants } from 'ts/utils/constants';
 import { errorReporter } from 'ts/utils/error_reporter';
 import { utils } from 'ts/utils/utils';
+import { InputLabel } from 'ts/components/ui/input_label';
 
 enum SigningState {
     UNSIGNED,
@@ -42,6 +45,7 @@ interface GenerateOrderFormProps {
     userAddress: string;
     orderECSignature: ECSignature;
     orderTakerAddress: string;
+    orderThumbnailContent: string;
     orderSalt: BigNumber;
     sideToAssetToken: SideToAssetToken;
     tokenByAddress: TokenByAddress;
@@ -176,6 +180,24 @@ export class GenerateOrderForm extends React.Component<GenerateOrderFormProps, G
                             label="Order Hash"
                         />
                     </div>
+                    <div className="pt1 pb1">
+                        <InputLabel text="Generate Social Thumbnail Image" />
+                        <Paper className="p1 mt1 overflow-hidden" style={{ height: 164 }}>
+                            <TextField
+                                id="thumbnailContent"
+                                hintStyle={{ bottom: 0, top: 0 }}
+                                fullWidth={true}
+                                value={this.props.orderThumbnailContent}
+                                onChange={this._updateThumbnailContent.bind(this)}
+                                hintText="You can use **bold** or _italic_. You can also use the following symbols: <<MAKER_TOKEN_AMOUNT>> <<MAKER_TOKEN_SYMBOL>> <<MAKER_TOKEN_LOGO>> <<TAKER_TOKEN_AMOUNT>> <<TAKER_TOKEN_SYMBOL>> or <<TAKER_TOKEN_LOGO>>."
+                                multiLine={true}
+                                rows={6}
+                                rowsMax={6}
+                                underlineStyle={{ display: 'none' }}
+                                textareaStyle={{ marginTop: 0 }}
+                            />
+                        </Paper>
+                    </div>
                     <div className="pt2">
                         <div className="center">
                             <LifeCycleRaisedButton
@@ -207,6 +229,7 @@ export class GenerateOrderForm extends React.Component<GenerateOrderFormProps, G
                         orderMakerFee={this.props.hashData.makerFee}
                         orderTakerFee={this.props.hashData.takerFee}
                         orderFeeRecipient={this.props.hashData.feeRecipientAddress}
+                        orderThumbnailContent={this.props.orderThumbnailContent}
                         sideToAssetToken={this.props.sideToAssetToken}
                         tokenByAddress={this.props.tokenByAddress}
                     />
@@ -324,6 +347,7 @@ export class GenerateOrderForm extends React.Component<GenerateOrderFormProps, G
                 hashData.orderExpiryTimestamp,
                 this.props.orderTakerAddress,
                 this.props.userAddress,
+                this.props.orderThumbnailContent,
                 hashData.makerFee,
                 hashData.takerFee,
                 hashData.feeRecipientAddress,
@@ -358,6 +382,13 @@ export class GenerateOrderForm extends React.Component<GenerateOrderFormProps, G
         if (!_.isUndefined(address)) {
             const normalizedAddress = _.isEmpty(address) ? ZeroEx.NULL_ADDRESS : address;
             this.props.dispatcher.updateOrderTakerAddress(normalizedAddress);
+        }
+    }
+    private _updateThumbnailContent(evt: any): void {
+        const thumbContent = evt.target.value;
+        if (!_.isUndefined(thumbContent)) {
+            const thumbnailContent = _.isEmpty(thumbContent) ? "" : thumbContent;
+            this.props.dispatcher.updateOrderThumbnailContent(thumbnailContent);
         }
     }
 }

@@ -91,6 +91,12 @@ export class Dispatcher {
             type: ActionTypes.UpdateUserAddress,
         });
     }
+    public updateOrderThumbnailContent(address: string) {
+        this._dispatch({
+            data: address,
+            type: ActionTypes.UpdateOrderThumbnailContent,
+        });
+    }
     public updateOrderExpiry(unixTimestampSec: BigNumber) {
         this._dispatch({
             data: unixTimestampSec,
